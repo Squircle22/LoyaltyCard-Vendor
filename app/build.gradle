@@ -1,5 +1,12 @@
 apply plugin: 'com.android.application'
 
+allprojects {
+    repositories {
+        // ...
+        maven { url 'https://maven.fabric.io/public' }
+    }
+}
+
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
@@ -24,10 +31,21 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:appcompat-v7:25.3.1' // warning due to firebase-ui-auth using v:25.1.1, change version to match firebase-ui if issues arise
     compile 'com.android.support:design:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
     testCompile 'junit:junit:4.12'
+
+    // Firebase
+    compile 'com.google.firebase:firebase-database:10.2.1'
+    compile 'com.google.firebase:firebase-auth:10.2.1'
+
+    // FirebaseUI Auth only
+    compile 'com.firebaseui:firebase-ui-auth:1.2.0'
+
+    // ZXing and XZing Android Embedded
+    compile 'com.google.zxing:core:3.3.0'
+    compile 'com.journeyapps:zxing-android-embedded:3.4.0'
 }
 
 // Firebase
