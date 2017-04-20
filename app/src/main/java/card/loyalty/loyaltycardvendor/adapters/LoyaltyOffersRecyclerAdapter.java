@@ -24,6 +24,11 @@ public class LoyaltyOffersRecyclerAdapter extends RecyclerView.Adapter<LoyaltyOf
         mOffers = offers;
     }
 
+    public void setOffers(List<LoyaltyOffer> offers) {
+        mOffers = offers;
+        notifyItemChanged(mOffers.size());
+    }
+
     @Override
     public LoyaltyOfferViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.loyalty_offer_list_item, parent, false);

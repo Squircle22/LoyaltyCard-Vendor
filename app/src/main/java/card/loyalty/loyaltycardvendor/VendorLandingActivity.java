@@ -22,9 +22,17 @@ import android.widget.Toast;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import card.loyalty.loyaltycardvendor.adapters.LoyaltyOffersRecyclerAdapter;
 import card.loyalty.loyaltycardvendor.data_models.LoyaltyOffer;
@@ -40,9 +48,18 @@ public class VendorLandingActivity extends AppCompatActivity
     // Adapter for Recycler View
     private LoyaltyOffersRecyclerAdapter mRecyclerAdapter;
 
-    // Firebase Authentication Variables
+    // Offers List
+    private List<LoyaltyOffer> mOffers;
+
+    // Firebase Authentication
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
+
+    // Firebase Database
+    private DatabaseReference mRootRef;
+    private DatabaseReference mLoyaltyOffersRef;
+    private ChildEventListener mChildEventListener;
+    private ValueEventListener mValueEventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,22 +71,16 @@ public class VendorLandingActivity extends AppCompatActivity
         // Firebase Authentication Initialisation
         mFirebaseAuth = FirebaseAuth.getInstance();
 
-        // some crazy code to be removed soon
-        ArrayList<LoyaltyOffer> offers = new ArrayList<>();
-        offers.add(new LoyaltyOffer("1", "ven02", "Get 1 with every 1", "1", "1 free thing"));
-        offers.add(new LoyaltyOffer("2", "ven02", "Get 1 with every 2", "1", "1 free thing"));
-        offers.add(new LoyaltyOffer("3", "ven02", "Get 1 with every 5", "1", "1 free thing"));
-        offers.add(new LoyaltyOffer("4", "ven02", "Get 2 with every 11", "1", "1 free thing"));
-        offers.add(new LoyaltyOffer("5", "ven02", "Buy 4 get 1 free", "1", "1 free thing"));
-        offers.add(new LoyaltyOffer("6", "ven02", "Get 1 with every 1", "1", "1 free thing"));
-        offers.add(new LoyaltyOffer("7", "ven02", "Buy 6 get 1 free", "1", "1 free thing"));
-        offers.add(new LoyaltyOffer("8", "ven02", "Buy 5 get 1 free", "1", "1 free thing"));
-        offers.add(new LoyaltyOffer("9", "ven02", "Get 1 with every 1", "1", "1 free thing"));
-        offers.add(new LoyaltyOffer("10", "ven02", "Buy 2 get 1 free", "1", "1 free thing"));
+        // Firebase Database Initialisation
+        mRootRef = FirebaseDatabase.getInstance().getReference();
+        mLoyaltyOffersRef = mRootRef.child("LoyaltyOffers");
+
+        // Initialise offers list
+        mOffers = new ArrayList<>();
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.landing_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerAdapter = new LoyaltyOffersRecyclerAdapter(offers);
+        mRecyclerAdapter = new LoyaltyOffersRecyclerAdapter(mOffers);
         recyclerView.setAdapter(mRecyclerAdapter);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -114,6 +125,38 @@ public class VendorLandingActivity extends AppCompatActivity
                 }
             }
         };
+    }
+
+    // Database listener retrieves offers from Firebase and sets data to recycler view adapter
+    private void attachDatabaseReadListener() {
+        Query query = mLoyaltyOffersRef.orderByChild("vendorID").equalTo(mFirebaseAuth.getCurrentUser().getUid());
+
+        if (mValueEventListener == null) {
+            mValueEventListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        mOffers.clear();
+                        for (DataSnapshot offerSnapshot : dataSnapshot.getChildren()) {
+                            LoyaltyOffer offer = offerSnapshot.getValue(LoyaltyOffer.class);
+                            mOffers.add(offer);
+                        }
+                        mRecyclerAdapter.setOffers(mOffers);
+                    }
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                }
+            };
+        }
+
+        query.addValueEventListener(mValueEventListener);
+    }
+    private void detachDatabaseReadListener() {
+        if (mChildEventListener != null) {
+            mLoyaltyOffersRef.removeEventListener(mChildEventListener);
+            mChildEventListener = null;
+        }
     }
 
     @Override
@@ -208,14 +251,14 @@ public class VendorLandingActivity extends AppCompatActivity
         return true;
     }
 
-    // Once signed in initialise QR code and set any other user specific data here. For example attach database event listener here
+    // Once signed in set any user specific data here. For example attach database event listener here
     private void onSignedInInitialise(FirebaseUser user){
-
+        attachDatabaseReadListener();
     }
 
     // On signing out clean up any user specific data here. For example detatch database event listener
     private void onSignedOutCleanup() {
-
+        detachDatabaseReadListener();
     }
 
     // Launch the add offer activity
