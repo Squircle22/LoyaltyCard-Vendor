@@ -38,7 +38,7 @@ import card.loyalty.loyaltycardvendor.adapters.LoyaltyOffersRecyclerAdapter;
 import card.loyalty.loyaltycardvendor.data_models.LoyaltyOffer;
 
 public class VendorLandingActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, RecyclerClickListener.OnRecyclerClickListener {
 
     private static final String TAG = "VendorLandingActivity";
     private static final int RC_SIGN_IN = 123;
@@ -80,6 +80,10 @@ public class VendorLandingActivity extends AppCompatActivity
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.landing_recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // Add the RecyclerClickListener
+        recyclerView.addOnItemTouchListener(new RecyclerClickListener(this, recyclerView, this));
+
         mRecyclerAdapter = new LoyaltyOffersRecyclerAdapter(mOffers);
         recyclerView.setAdapter(mRecyclerAdapter);
 
@@ -268,5 +272,21 @@ public class VendorLandingActivity extends AppCompatActivity
         Intent intent = new Intent(this, AddOfferActivity.class);
         intent.putExtra(EXTRA_FIREBASE_UID, Uid);
         startActivity(intent);
+    }
+
+    // When recycler item is clicked/tapped
+    @Override
+    public void onClick(View view, int position) {
+        Log.d(TAG, "onClick: starts");
+        // makes a toast message for now...more functionality to come
+        Toast.makeText(VendorLandingActivity.this, "Normal tap at position " + position, Toast.LENGTH_SHORT).show();
+    }
+
+    // When recycler item is longPressed
+    @Override
+    public void onLongClick(View view, int position) {
+        Log.d(TAG, "onLongClick: starts");
+        // makes a toast message for now...more functionality to come
+        Toast.makeText(VendorLandingActivity.this, "Long tap at position " + position, Toast.LENGTH_LONG).show();
     }
 }
