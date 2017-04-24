@@ -15,13 +15,18 @@ public class LoyaltyOffer {
 
     public LoyaltyOffer() {};
 
-    public LoyaltyOffer(String offerID, String vendorID, String description, String purchasesPerReward, String reward) {
+    public LoyaltyOffer(String vendorID, String description, String purchasesPerReward, String reward) {
         this.vendorID = vendorID;
         this.description = description;
         this.purchasesPerReward = purchasesPerReward;
         this.reward = reward;
-
-        this.offerID = offerID;
     }
 
+    public String getOfferID() {
+        return offerID;
+    }
+
+    public void setOfferID(String offerID) {
+        this.offerID = offerID;
+    }
 }

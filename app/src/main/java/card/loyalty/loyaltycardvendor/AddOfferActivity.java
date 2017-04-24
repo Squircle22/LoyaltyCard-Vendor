@@ -50,7 +50,7 @@ public class AddOfferActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String key = mLoyaltyOffersRef.push().getKey();
-                LoyaltyOffer newOffer = new LoyaltyOffer(key, mUid, description.getText().toString(), purchasesPerReward.getText().toString(), reward.getText().toString());
+                LoyaltyOffer newOffer = new LoyaltyOffer(mUid, description.getText().toString(), purchasesPerReward.getText().toString(), reward.getText().toString());
                 mLoyaltyOffersRef.child(key).setValue(newOffer, new DatabaseReference.CompletionListener() {
 
                     @Override

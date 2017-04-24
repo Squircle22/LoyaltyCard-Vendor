@@ -153,6 +153,7 @@ public class VendorLandingActivity extends AppCompatActivity
                         mOffers.clear();
                         for (DataSnapshot offerSnapshot : dataSnapshot.getChildren()) {
                             LoyaltyOffer offer = offerSnapshot.getValue(LoyaltyOffer.class);
+                            offer.setOfferID(offerSnapshot.getKey());
                             mOffers.add(offer);
                         }
                         mRecyclerAdapter.setOffers(mOffers);
