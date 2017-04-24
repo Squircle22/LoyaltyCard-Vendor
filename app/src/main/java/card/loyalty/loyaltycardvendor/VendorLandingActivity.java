@@ -1,11 +1,11 @@
 package card.loyalty.loyaltycardvendor;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -29,6 +29,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,11 +90,19 @@ public class VendorLandingActivity extends AppCompatActivity
         recyclerView.setAdapter(mRecyclerAdapter);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        final Activity activity = this;
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+                IntentIntegrator integrator = new IntentIntegrator(activity);
+                integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
+                integrator.setPrompt("Scan");
+                integrator.setCameraId(0);
+                integrator.setBeepEnabled(false);
+                integrator.setBarcodeImageEnabled(false);
+                integrator.initiateScan();
             }
         });
 
@@ -173,6 +183,16 @@ public class VendorLandingActivity extends AppCompatActivity
             } else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(this, "Sign in cancelled", Toast.LENGTH_SHORT).show();
                 finish();
+            }
+        } else {
+            // Handle the QR scanning result
+            IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+            if (result != null) {
+                if (result.getContents() == null) {
+                    Toast.makeText(this, "You cancelled the scanning", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, result.getContents(), Toast.LENGTH_LONG).show();
+                }
             }
         }
     }
