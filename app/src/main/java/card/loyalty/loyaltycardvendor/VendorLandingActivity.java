@@ -182,7 +182,7 @@ public class VendorLandingActivity extends AppCompatActivity
     protected void updateCard(LoyaltyCard card) {
         Log.d(TAG, "updateCard: start");
         card.addToPurchaseCount(1);
-        String key = card.getCardID();
+        String key = card.retrieveCardID();
         if (key == null) key = mLoyaltyCardsRef.push().getKey();
         mLoyaltyCardsRef.child(key).setValue(card, new DatabaseReference.CompletionListener() {
             @Override

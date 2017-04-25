@@ -29,7 +29,7 @@ public class LoyaltyCard {
         this.offerID_customerID = offerID + "_" + customerID;
     }
 
-    public String getCardID() {
+    public String retrieveCardID() {
         return cardID;
     }
 
