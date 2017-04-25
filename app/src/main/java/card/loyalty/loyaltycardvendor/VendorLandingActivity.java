@@ -37,6 +37,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import card.loyalty.loyaltycardvendor.adapters.LoyaltyOffersRecyclerAdapter;
+import card.loyalty.loyaltycardvendor.data_models.LoyaltyCard;
 import card.loyalty.loyaltycardvendor.data_models.LoyaltyOffer;
 
 public class VendorLandingActivity extends AppCompatActivity
@@ -60,8 +61,12 @@ public class VendorLandingActivity extends AppCompatActivity
     // Firebase Database
     private DatabaseReference mRootRef;
     private DatabaseReference mLoyaltyOffersRef;
+    private DatabaseReference mLoyaltyCardsRef;
     private ChildEventListener mChildEventListener;
     private ValueEventListener mValueEventListener;
+
+    // Field to store the index of the offer being scanned
+    private int mOfferIndex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +81,7 @@ public class VendorLandingActivity extends AppCompatActivity
         // Firebase Database Initialisation
         mRootRef = FirebaseDatabase.getInstance().getReference();
         mLoyaltyOffersRef = mRootRef.child("LoyaltyOffers");
+        mLoyaltyCardsRef = mRootRef.child("LoyaltyCards");
 
         // Initialise offers list
         mOffers = new ArrayList<>();
@@ -141,6 +147,65 @@ public class VendorLandingActivity extends AppCompatActivity
         };
     }
 
+    // TODO: Refactor methods relating to updating customer card using ReactiveX (RxJava/RxAndroid)
+    private void processScanResult(final String offerID, final String customerID) {
+        String offerIDcustomerID = offerID + "_" + customerID;
+        Log.d(TAG, "processScanResult: start");
+        Query query = mLoyaltyCardsRef.orderByChild("offerID_customerID").equalTo(offerIDcustomerID);
+
+        ValueEventListener listener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot cardSnapshot: dataSnapshot.getChildren()) {
+                        LoyaltyCard card = cardSnapshot.getValue(LoyaltyCard.class);
+                        Log.d(TAG, "onDataChange: card purchase count: " + card.purchaseCount);
+                        card.setCardID(cardSnapshot.getKey());
+                        updateCard(card);
+                    }
+                } else {
+                    createCard(offerID, customerID);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // TODO on cancelled method
+            }
+        };
+
+        query.addListenerForSingleValueEvent(listener);
+        Log.d(TAG, "processScanResult: end");
+    }
+
+    // TODO: Refactor as Rx
+    protected void updateCard(LoyaltyCard card) {
+        Log.d(TAG, "updateCard: start");
+        card.addToPurchaseCount(1);
+        String key = card.getCardID();
+        if (key == null) key = mLoyaltyCardsRef.push().getKey();
+        mLoyaltyCardsRef.child(key).setValue(card, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError != null) {
+                    Toast.makeText(VendorLandingActivity.this, "FAILED TO UPDATE. TRY AGAIN!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(VendorLandingActivity.this, "Purchase Count Successfully Updated", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "onComplete: success");
+                }
+            }
+        });
+        Log.d(TAG, "updateCard: end");
+    }
+
+    // TODO: Refactor as Rx
+    private void createCard(String offerID, String customerID) {
+        Log.d(TAG, "createCard: start");
+        LoyaltyCard card = new LoyaltyCard(offerID, customerID);
+        updateCard(card);
+        Log.d(TAG, "createCard: end");
+    }
+
     // Database listener retrieves offers from Firebase and sets data to recycler view adapter
     private void attachDatabaseReadListener() {
         Query query = mLoyaltyOffersRef.orderByChild("vendorID").equalTo(mFirebaseAuth.getCurrentUser().getUid());
@@ -150,6 +215,7 @@ public class VendorLandingActivity extends AppCompatActivity
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists()) {
+                        Log.d(TAG, "onDataChange: data change detected");
                         mOffers.clear();
                         for (DataSnapshot offerSnapshot : dataSnapshot.getChildren()) {
                             LoyaltyOffer offer = offerSnapshot.getValue(LoyaltyOffer.class);
@@ -192,7 +258,9 @@ public class VendorLandingActivity extends AppCompatActivity
                 if (result.getContents() == null) {
                     Toast.makeText(this, "You cancelled the scanning", Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(this, result.getContents(), Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "onActivityResult: result.getContents(): "+ result.getContents());
+                    String offerID = mOffers.get(mOfferIndex).getOfferID();
+                    processScanResult(offerID, result.getContents());
                 }
             }
         }
@@ -301,6 +369,8 @@ public class VendorLandingActivity extends AppCompatActivity
         Log.d(TAG, "onClick: starts");
         // makes a toast message for now...more functionality to come
         Toast.makeText(VendorLandingActivity.this, "Normal tap at position " + position, Toast.LENGTH_SHORT).show();
+        mOfferIndex = position;
+        launchScanner();
     }
 
     // When recycler item is longPressed
@@ -309,5 +379,16 @@ public class VendorLandingActivity extends AppCompatActivity
         Log.d(TAG, "onLongClick: starts");
         // makes a toast message for now...more functionality to come
         Toast.makeText(VendorLandingActivity.this, "Long tap at position " + position, Toast.LENGTH_LONG).show();
+    }
+
+    // Launch the QR Scanner
+    private void launchScanner() {
+        IntentIntegrator integrator = new IntentIntegrator(this);
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
+        integrator.setPrompt("Scan");
+        integrator.setCameraId(0);
+        integrator.setBeepEnabled(false);
+        integrator.setBarcodeImageEnabled(false);
+        integrator.initiateScan();
     }
 }

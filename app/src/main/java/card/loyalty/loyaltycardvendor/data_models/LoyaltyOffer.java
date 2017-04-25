@@ -6,6 +6,7 @@ package card.loyalty.loyaltycardvendor.data_models;
 
 public class LoyaltyOffer {
 
+    // Public fields for Firebase interaction
     public String vendorID;
     public String description;
     public String purchasesPerReward;
