@@ -26,7 +26,7 @@ public class LoyaltyOffersRecyclerAdapter extends RecyclerView.Adapter<LoyaltyOf
 
     public void setOffers(List<LoyaltyOffer> offers) {
         mOffers = offers;
-        notifyItemChanged(mOffers.size());
+        notifyDataSetChanged();
     }
 
     @Override
