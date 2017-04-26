@@ -22,7 +22,6 @@ import android.widget.Toast;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -62,8 +61,8 @@ public class VendorLandingActivity extends AppCompatActivity
     private DatabaseReference mRootRef;
     private DatabaseReference mLoyaltyOffersRef;
     private DatabaseReference mLoyaltyCardsRef;
-    private ChildEventListener mChildEventListener;
     private ValueEventListener mValueEventListener;
+    private Query mQuery;
 
     // Field to store the index of the offer being scanned
     private int mOfferIndex;
@@ -208,7 +207,7 @@ public class VendorLandingActivity extends AppCompatActivity
 
     // Database listener retrieves offers from Firebase and sets data to recycler view adapter
     private void attachDatabaseReadListener() {
-        Query query = mLoyaltyOffersRef.orderByChild("vendorID").equalTo(mFirebaseAuth.getCurrentUser().getUid());
+        mQuery = mLoyaltyOffersRef.orderByChild("vendorID").equalTo(mFirebaseAuth.getCurrentUser().getUid());
 
         if (mValueEventListener == null) {
             mValueEventListener = new ValueEventListener() {
@@ -231,12 +230,12 @@ public class VendorLandingActivity extends AppCompatActivity
             };
         }
 
-        query.addValueEventListener(mValueEventListener);
+        mQuery.addValueEventListener(mValueEventListener);
     }
     private void detachDatabaseReadListener() {
-        if (mChildEventListener != null) {
-            mLoyaltyOffersRef.removeEventListener(mChildEventListener);
-            mChildEventListener = null;
+        if (mValueEventListener != null) {
+            mQuery.removeEventListener(mValueEventListener);
+            mValueEventListener = null;
         }
     }
 
