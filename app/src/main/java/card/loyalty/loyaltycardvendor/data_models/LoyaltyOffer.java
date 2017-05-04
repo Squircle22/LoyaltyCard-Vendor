@@ -14,7 +14,7 @@ public class LoyaltyOffer {
 
     private String offerID;
 
-    public LoyaltyOffer() {};
+    public LoyaltyOffer() {}
 
     public LoyaltyOffer(String vendorID, String description, String purchasesPerReward, String reward) {
         this.vendorID = vendorID;
@@ -30,4 +30,5 @@ public class LoyaltyOffer {
     public void setOfferID(String offerID) {
         this.offerID = offerID;
     }
+
 }

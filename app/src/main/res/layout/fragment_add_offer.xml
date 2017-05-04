@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Add Offer XML -->
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="card.loyalty.loyaltycardvendor.AddOfferFragment">
+
+    <!-- Layout Handler-->
+    <!-- backgroundTint only supported by APL 21 or higher -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:layout_marginStart="@dimen/side_padding"
+        android:layout_marginEnd="@dimen/side_padding">
+
+        <!-- UID TEXT VIEW -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vendor UID:" />
+
+            <TextView
+                android:id="@+id/offer_uid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TextView" />
+        </LinearLayout>
+
+        <!-- DESCRIPTION FIELD -->
+        <!-- Added multiple line support
+             Added max character limit of 200 - can change -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:text="Description"
+                android:textColor="@color/colorPrimary"
+                android:textSize="@dimen/field_label_size" />
+
+            <EditText
+                android:id="@+id/offer_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorPrimary"
+                android:hint="Offer Description"
+                android:layout_marginStart="-4dp"
+                android:layout_marginEnd="-4dp"
+                android:inputType="textMultiLine"
+                android:maxLength="200" />
+        </LinearLayout>
+
+
+        <!-- PURCHASE PER REWARD FIELD -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:text="Purchases Per Reward"
+                android:textColor="@color/colorPrimary"
+                android:textSize="@dimen/field_label_size" />
+
+            <EditText
+                android:id="@+id/offer_purchases_per_reward"
+                android:hint="e.g. 6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="-4dp"
+                android:layout_marginEnd="-4dp"
+                android:backgroundTint="@color/colorPrimary"
+                android:inputType="number" />
+        </LinearLayout>
+
+
+            <!-- REWARD FIELD -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:text="Reward"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="@dimen/field_label_size" />
+
+                <EditText
+                    android:id="@+id/offer_reward"
+                    android:hint="Reward Description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="-4dp"
+                    android:layout_marginEnd="-4dp"
+                    android:backgroundTint="@color/colorPrimary"
+                    android:inputType="textMultiLine"
+                    android:maxLength="50" />
+
+            </LinearLayout>
+
+        <!-- BUTTON CONTAINER -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="8dp">
+
+            <!-- CANCEL BUTTON - Placeholder -->
+            <Button
+                android:id="@+id/btn_cancel_offer"
+                android:minHeight="36dp"
+                android:layout_marginRight="15dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:background="@color/tw__transparent"
+                android:text="Cancel"
+                android:textColor="@color/colorAccent" />
+
+            <!-- SUBMIT BUTTON -->
+            <Button
+                android:id="@+id/btn_submit_offer"
+                android:minHeight="36dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:background="@drawable/rounded_button"
+                android:text="Submit"
+                android:textColor="#FFFFFF" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</android.support.design.widget.CoordinatorLayout>
