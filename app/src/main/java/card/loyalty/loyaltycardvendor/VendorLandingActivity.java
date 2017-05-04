@@ -147,7 +147,7 @@ public class VendorLandingActivity extends AppCompatActivity
     }
 
     // TODO: Refactor methods relating to updating customer card using ReactiveX (RxJava/RxAndroid)
-    private void processScanResult(final String offerID, final String customerID) {
+    private void processScanResult(final String offerID, final String customerID, final String vendorID) {
         String offerIDcustomerID = offerID + "_" + customerID;
         Log.d(TAG, "processScanResult: start");
         Query query = mLoyaltyCardsRef.orderByChild("offerID_customerID").equalTo(offerIDcustomerID);
@@ -163,7 +163,7 @@ public class VendorLandingActivity extends AppCompatActivity
                         updateCard(card);
                     }
                 } else {
-                    createCard(offerID, customerID);
+                    createCard(offerID, customerID, vendorID);
                 }
             }
 
@@ -198,9 +198,9 @@ public class VendorLandingActivity extends AppCompatActivity
     }
 
     // TODO: Refactor as Rx
-    private void createCard(String offerID, String customerID) {
+    private void createCard(String offerID, String customerID, String vendorID) {
         Log.d(TAG, "createCard: start");
-        LoyaltyCard card = new LoyaltyCard(offerID, customerID);
+        LoyaltyCard card = new LoyaltyCard(offerID, customerID, vendorID);
         updateCard(card);
         Log.d(TAG, "createCard: end");
     }
@@ -259,7 +259,7 @@ public class VendorLandingActivity extends AppCompatActivity
                 } else {
                     Log.d(TAG, "onActivityResult: result.getContents(): "+ result.getContents());
                     String offerID = mOffers.get(mOfferIndex).getOfferID();
-                    processScanResult(offerID, result.getContents());
+                    processScanResult(offerID, result.getContents(), mFirebaseAuth.getCurrentUser().getUid());
                 }
             }
         }

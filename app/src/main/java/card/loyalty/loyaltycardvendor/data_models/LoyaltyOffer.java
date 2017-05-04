@@ -12,6 +12,7 @@ public class LoyaltyOffer {
     public String purchasesPerReward;
     public String reward;
 
+
     private String offerID;
 
     public LoyaltyOffer() {};

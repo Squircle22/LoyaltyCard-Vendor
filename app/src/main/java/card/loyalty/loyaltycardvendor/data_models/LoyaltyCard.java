@@ -12,6 +12,7 @@ public class LoyaltyCard {
     public String purchaseCount;
     public String rewardsIssued;
     public String rewardsClaimed;
+    public String vendorID;
 
     // Hybrid key for search
     public String offerID_customerID;
@@ -20,13 +21,14 @@ public class LoyaltyCard {
 
     public LoyaltyCard() {};
 
-    public LoyaltyCard(String offerID, String customerID) {
+    public LoyaltyCard(String offerID, String customerID, String vendorID) {
         this.offerID = offerID;
         this.customerID = customerID;
         this.purchaseCount = "0";
         this.rewardsIssued = "0";
         this.rewardsClaimed = "0";
         this.offerID_customerID = offerID + "_" + customerID;
+        this.vendorID = vendorID;
     }
 
     public String retrieveCardID() {
