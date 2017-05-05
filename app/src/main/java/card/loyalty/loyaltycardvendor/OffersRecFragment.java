@@ -17,6 +17,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.zxing.integration.android.IntentIntegrator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ import card.loyalty.loyaltycardvendor.data_models.LoyaltyOffer;
  * Created by Caleb T on 3/05/2017.
  */
 
-public class OffersRecFragment extends Fragment {
+public class OffersRecFragment extends Fragment implements RecyclerClickListener.OnRecyclerClickListener{
 
     private static final String TAG = "OffersRecFragment";
 
@@ -79,9 +80,11 @@ public class OffersRecFragment extends Fragment {
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
 
+        // Add the RecyclerClickListener
+        recyclerView.addOnItemTouchListener(new RecyclerClickListener(getContext(), recyclerView, this));
+
         // Creates recyclerAdapter for content
         recyclerAdapter = new LoyaltyOffersRecyclerAdapter(mOffers);
-
         recyclerView.setAdapter(recyclerAdapter);
 
         return view;
@@ -123,6 +126,7 @@ public class OffersRecFragment extends Fragment {
                             Log.d(TAG, "Current offer description: " + offer.purchasesPerReward);
                         }
                         recyclerAdapter.setOffers(mOffers);
+                        ((VendorActivity) getActivity()).mOffers = mOffers;
                     } else {
                         Log.d(TAG, "dataSnapshot doesn't exist");
                     }
@@ -146,4 +150,25 @@ public class OffersRecFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onClick(View view, int position) {
+        ((VendorActivity) getActivity()).mOfferIndex = position;
+        launchScanner();
+    }
+
+    @Override
+    public void onLongClick(View view, int position) {
+
+    }
+
+    // Launch the QR Scanner
+    private void launchScanner() {
+        IntentIntegrator integrator = new IntentIntegrator(getActivity());
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
+        integrator.setPrompt("Scan");
+        integrator.setCameraId(0);
+        integrator.setBeepEnabled(false);
+        integrator.setBarcodeImageEnabled(false);
+        integrator.initiateScan();
+    }
 }

@@ -11,8 +11,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -32,11 +30,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import card.loyalty.loyaltycardvendor.adapters.LoyaltyOffersRecyclerAdapter;
 import card.loyalty.loyaltycardvendor.data_models.LoyaltyCard;
 import card.loyalty.loyaltycardvendor.data_models.LoyaltyOffer;
 
@@ -45,6 +41,13 @@ public class VendorActivity extends AppCompatActivity
 
     private static final String TAG = "VendorActivity";
     private static final int RC_SIGN_IN = 123;
+
+
+    public int mOfferIndex;
+    public DatabaseReference mLoyaltyCardsRef;
+
+    // List of Offers created
+    public List<LoyaltyOffer> mOffers;
 
     // Drawer Objects
     private DrawerLayout drawerLayout;
@@ -67,6 +70,7 @@ public class VendorActivity extends AppCompatActivity
         // Firebase Authentication Initialisation
         mFirebaseAuth = FirebaseAuth.getInstance();
         UID = mFirebaseAuth.getCurrentUser().getUid();
+        mLoyaltyCardsRef = FirebaseDatabase.getInstance().getReference().child("LoyaltyCards");
 
         uidArgs = new Bundle();
         uidArgs.putString(EXTRA_FIREBASE_UID, UID);
@@ -145,7 +149,79 @@ public class VendorActivity extends AppCompatActivity
                 Toast.makeText(this, "Sign in cancelled", Toast.LENGTH_SHORT).show();
                 finish();
             }
+        }else {
+            // Handle the QR scanning result
+            IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+            if (result != null) {
+                if (result.getContents() == null) {
+                    Toast.makeText(this, "You cancelled the scanning", Toast.LENGTH_LONG).show();
+                } else {
+                    Log.d(TAG, "onActivityResult: result.getContents(): "+ result.getContents());
+                    String offerID = mOffers.get(mOfferIndex).getOfferID();
+                    processScanResult(offerID, result.getContents());
+                }
+            }
         }
+    }
+
+    // processes the result of scanning
+    private void processScanResult(final String offerID, final String customerID) {
+        String offerIDcustomerID = offerID + "_" + customerID;
+        Log.d(TAG, "processScanResult: start");
+        Query query = mLoyaltyCardsRef.orderByChild("offerID_customerID").equalTo(offerIDcustomerID);
+
+        ValueEventListener listener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot cardSnapshot: dataSnapshot.getChildren()) {
+                        LoyaltyCard card = cardSnapshot.getValue(LoyaltyCard.class);
+                        card.vendorID = mFirebaseAuth.getCurrentUser().getUid();
+                        Log.d(TAG, "onDataChange: card purchase count: " + card.purchaseCount);
+                        card.setCardID(cardSnapshot.getKey());
+                        updateCard(card);
+                    }
+                } else {
+                    createCard(offerID, customerID);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // TODO on cancelled method
+            }
+        };
+
+        query.addListenerForSingleValueEvent(listener);
+        Log.d(TAG, "processScanResult: end");
+    }
+
+    // updates the card
+    protected void updateCard(LoyaltyCard card) {
+        Log.d(TAG, "updateCard: start");
+        card.addToPurchaseCount(1);
+        String key = card.retrieveCardID();
+        if (key == null) key = mLoyaltyCardsRef.push().getKey();
+        mLoyaltyCardsRef.child(key).setValue(card, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (databaseError != null) {
+                    Toast.makeText(VendorActivity.this, "FAILED TO UPDATE. TRY AGAIN!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(VendorActivity.this, "Purchase Count Successfully Updated", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "onComplete: success");
+                }
+            }
+        });
+        Log.d(TAG, "updateCard: end");
+    }
+
+    // creates a new card
+    private void createCard(String offerID, String customerID) {
+        Log.d(TAG, "createCard: start");
+        LoyaltyCard card = new LoyaltyCard(offerID, customerID);
+        updateCard(card);
+        Log.d(TAG, "createCard: end");
     }
 
     // On resuming activity
@@ -239,4 +315,5 @@ public class VendorActivity extends AppCompatActivity
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
+
 }

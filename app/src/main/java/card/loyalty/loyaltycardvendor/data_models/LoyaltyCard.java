@@ -12,6 +12,7 @@ public class LoyaltyCard {
     public String purchaseCount;
     public String rewardsIssued;
     public String rewardsClaimed;
+    public String vendorID;
 
     // Hybrid key for search
     public String offerID_customerID;

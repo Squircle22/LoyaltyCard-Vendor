@@ -38,7 +38,7 @@ public class RecyclerClickListener extends RecyclerView.SimpleOnItemTouchListene
 
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                Log.d(TAG, "onLongPress: starts");
+                Log.d(TAG, "onSingleTapConfirmed: starts");
                 View childView = recyclerView.findChildViewUnder(e.getX(),e.getY());
                 if (childView != null && mListener != null) {
                     Log.d(TAG, "onSingleTapConfirmed: calling listener.onClick");
